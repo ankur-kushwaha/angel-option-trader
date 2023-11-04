@@ -1,0 +1,1 @@
+export const SMART_API_KEY = process.env.DB_HOST||'tbVBRdZc'
