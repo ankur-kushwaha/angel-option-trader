@@ -11,9 +11,7 @@ import { Instrument } from './types';
 export async function getDbData(filter:any){
  
   
-  const client = await MongoClient.connect(
-    'mongodb+srv://ankur:ankur@cluster0.wgb6k.mongodb.net/myFirstDatabase?authSource=admin&replicaSet=atlas-12lvf6-shard-0&readPreference=primary&ssl=true'
-  );
+  const client = await MongoClient.connect(process.env.MONGODB_URL||"");
   const coll = client.db('OptionTrader').collection('AngleInstrument');
   const cursor = coll.find(filter);
   const result = await cursor.toArray();
