@@ -1,23 +1,22 @@
-import { NextApiRequest } from "next";
+import { SMART_API_KEY } from "@/constants/config";
+import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 import { getDbData } from "./db";
 import { Instrument, Quote } from "./types";
-import { NextRequest } from "next/server";
-import { cookies } from "next/headers";
-import { SMART_API_KEY } from "@/constants/config";
 
 const axios = require('axios');
 
-async function getData(exchangeTokens:{
+async function getData(exchangeTokens: {
   NFO?: string[];
   BSE?: string[];
   NSE?: string[];
-}){
+}) {
   var data = JSON.stringify({
-    "mode": "FULL", 
+    "mode": "FULL",
     "exchangeTokens": exchangeTokens
   });
   const token = cookies().get('token')?.value;
-  
+
   var config = {
     method: 'post',
     url: 'https://apiconnect.angelbroking.com/rest/secure/angelbroking/market/v1/quote/',
@@ -29,7 +28,7 @@ async function getData(exchangeTokens:{
       'X-ClientPublicIP': 'CLIENT_PUBLIC_IP',
       'X-MACAddress': 'MAC_ADDRESS',
       'X-UserType': 'USER',
-      'Authorization': 'Bearer '+token,
+      'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json'
     },
     data: data
@@ -43,34 +42,34 @@ async function getData(exchangeTokens:{
     .catch(function (error: any) {
       console.log(error);
     });
-    return response
+  return response
 }
 
 
-async function getStockOptions(stockCode:string,multiple:number,threshold:number){
+async function getStockOptions(stockCode: string, multiple: number, threshold: number) {
   const ltp = await getLtp(stockCode);
-  let upperStrike = ltp - (threshold/100)*ltp
+  let upperStrike = ltp - (threshold / 100) * ltp
 
   const filter = {
-    'name': stockCode, 
-    'exch_seg': 'NFO', 
+    'name': stockCode,
+    'exch_seg': 'NFO',
     'instrumenttype': 'OPTSTK',
   };
-  let data:Instrument[] = await getDbData(filter);
+  let data: Instrument[] = await getDbData(filter);
 
-  let newData = data.filter(item=>{
-    let strikePrice = Number(item.strike)/100;
-    return strikePrice < upperStrike && item.symbol.endsWith('PE') && strikePrice%multiple == 0;
-  }).map(item=>{
+  let newData = data.filter(item => {
+    let strikePrice = Number(item.strike) / 100;
+    return strikePrice < upperStrike && item.symbol.endsWith('PE') && strikePrice % multiple == 0;
+  }).map(item => {
     return {
       ...item,
-      strike: Number(item.strike)/100,
-      stockLtp:ltp
+      strike: Number(item.strike) / 100,
+      stockLtp: ltp
     }
-  }).sort((a,b)=>-a.strike+b.strike)
+  }).sort((a, b) => -a.strike + b.strike)
   // console.log(data);
   return newData
-} 
+}
 
 type GetReturnTypeInPromise<T> = T extends (
   ...args: any[]
@@ -80,70 +79,74 @@ type GetReturnTypeInPromise<T> = T extends (
 
 type GetStockOptionsRetrunType = GetReturnTypeInPromise<typeof getStockOptions>[0]
 
-async function getToken(stockCode:string){
+async function getToken(stockCode: string) {
   const filter = {
-    'symbol': stockCode, 
+    'symbol': stockCode,
   };
-  let data = await  getDbData(filter)
+  let data = await getDbData(filter)
   return data[0].token;
 }
 
-async function getLtp(stockCode:string){
+async function getLtp(stockCode: string) {
   let token = await getToken(stockCode);
   let data = await getData({
-    BSE: [token+""],
+    BSE: [token + ""],
   });
   return data.data.fetched[0].ltp;
 }
 
-function getTop10Elements(data:any[]){
-  return data.slice(0,9);
+function getTop10Elements(data: any[]) {
+  return data.slice(0, 9);
 }
 
-async function getPremium(item:GetStockOptionsRetrunType){
-  console.log('Get premium for ',item.symbol);
+async function getPremium(item: GetStockOptionsRetrunType) {
+  console.log('Get premium for ', item.symbol);
+  let data: any = {}
+  try {
+    data = await getData({
+      "NFO": [item.token + ""]
+    });
+  } catch (e) {
+    console.error(e);
+    return undefined
+  }
 
-  let data = await getData({
-    "NFO": [item.token+""]
-  });
   console.log('Premium fetched', item.symbol);
 
-  let quote:Quote = data.data.fetched[0];
+  let quote: Quote = data.data.fetched[0];
   let premium = quote.depth.buy[0].price * Number(item.lotsize);
-  
+
   return {
-      tradingSymbol:quote.tradingSymbol,  
-      premium,
-      expiry:item.expiry,
-      stockLtp:item.stockLtp,
-      strike:item.strike,
-      lotSize:item.lotsize,
-      depth:{
-        buy:quote.depth.buy[0],
-        sell:quote.depth.sell[0]  
-      },
+    tradingSymbol: quote.tradingSymbol,
+    premium,
+    expiry: item.expiry,
+    stockLtp: item.stockLtp,
+    strike: item.strike,
+    lotSize: item.lotsize,
+    depth: {
+      buy: quote.depth.buy[0],
+      sell: quote.depth.sell[0]
+    },
   }
 }
 
-export type Premium = GetReturnTypeInPromise<typeof getPremium>
+export type Premium = Exclude<GetReturnTypeInPromise<typeof getPremium>,undefined>
 
-export async function GET(request: NextRequest ) {
+export async function GET(request: NextRequest) {
 
   const searchParams = request.nextUrl.searchParams
   searchParams.get('stockCode')
-  
-  let stockCode =  (searchParams.get('stockCode')||'PFC') as string;
-  let multiple = Number(searchParams.get('multiple'))||5;
-  let threshold = Number(searchParams.get('threshold'))|| 10;
 
-  const options = await getStockOptions(stockCode,multiple,threshold);
+  let stockCode = (searchParams.get('stockCode') || 'PFC') as string;
+  let multiple = Number(searchParams.get('multiple')) || 5;
+  let threshold = Number(searchParams.get('threshold')) || 10;
+
+  const options = await getStockOptions(stockCode, multiple, threshold);
   let topOtions = getTop10Elements(options);
 
-  let data = []
-  for(let item of topOtions){
-    data.push(await getPremium(item));
-  }
+
+  let data = await Promise.all(topOtions.map(getPremium));
   console.log('All premium fetched');
-  data = data.sort((a,b)=>b.premium-a.premium)
-  return Response.json({ data})
+  data = data.filter(item=>item).sort((a, b) => (b?.premium||0) - (a?.premium||0))
+  return Response.json({ data })
 }
