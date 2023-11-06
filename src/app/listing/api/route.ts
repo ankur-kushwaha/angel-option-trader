@@ -97,13 +97,16 @@ async function getLtp(stockCode:string){
 }
 
 function getTop10Elements(data:any[]){
-  return data.slice(0,10);
+  return data.slice(0,9);
 }
 
 async function getPremium(item:GetStockOptionsRetrunType){
+  console.log('Get premium for ',item.symbol);
+
   let data = await getData({
     "NFO": [item.token+""]
   });
+  console.log('Premium fetched', item.symbol);
 
   let quote:Quote = data.data.fetched[0];
   let premium = quote.depth.buy[0].price * Number(item.lotsize);
@@ -136,8 +139,11 @@ export async function GET(request: NextRequest ) {
   const options = await getStockOptions(stockCode,multiple,threshold);
   let topOtions = getTop10Elements(options);
 
-
-  let data = await Promise.all(topOtions.map(getPremium));
+  let data = []
+  for(let item of topOtions){
+    data.push(await getPremium(item));
+  }
+  console.log('All premium fetched');
   data = data.sort((a,b)=>b.premium-a.premium)
   return Response.json({ data})
 }
