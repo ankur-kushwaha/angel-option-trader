@@ -26,9 +26,10 @@ export default function Table() {
 
     let data  = JSON.parse(window.localStorage.getItem('OptionStocks')||"[]")
     for(let stockCode of data){
-      await fetch(`/listing/api?stockCode=${stockCode}&multiple=5&threshold=5`)
+      
+      await fetch(`/listing/api?stockCode=${stockCode}&multiple=${threshold||5}&threshold=5`)
       .then(res => res.json()).then(data => {
-        let key = `${stockCode}|5|5`
+        let key = `${stockCode}|5|${threshold||5}`
         appendData(key,data.data)
       })
     }
