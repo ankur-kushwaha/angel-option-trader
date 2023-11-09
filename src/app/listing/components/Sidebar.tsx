@@ -22,7 +22,7 @@ export default function Sidebar() {
     <aside id="" className="" aria-label="Sidebar">
       <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
         <ul className="space-y-2 font-medium">
-          {Object.keys(optionsData).sort((a,b)=>(optionsData[b]?.data[0].premium||0) - (optionsData[a]?.data[0].premium||0)).map((item, index) => {
+          {Object.keys(optionsData).sort((a,b)=>(optionsData[b]?.data[0]?.premium||0) - (optionsData[a]?.data[0]?.premium||0)).map((item, index) => {
             let [stockCode, multiple, threshold] = item.split("|");
             return <li key={index} onClick={() => handleClick(item)}>
               <a href="#" className="flex flex-row items-center justify-between p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
@@ -30,7 +30,7 @@ export default function Sidebar() {
                   <span className="">{stockCode} </span>
                   <span className=" text-xs text-gray-500 dark:text-gray-400">Multiple: {multiple}</span>
                   <span className=" text-xs text-gray-500 dark:text-gray-400">Threshold: {threshold}</span>
-                  <span className=" text-xs text-gray-500 dark:text-gray-400">Premium: {optionsData[item]?.data[0].premium}</span>
+                  <span className=" text-xs text-gray-500 dark:text-gray-400">Premium: {optionsData[item]?.data[0]?.premium}</span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(optionsData[item]?.createdAt||"").toLocaleString()}</span>
                 </div>
                 <div className='bg-slate-300 h-full p-4' onClick={()=>deleteItem(item)}>
