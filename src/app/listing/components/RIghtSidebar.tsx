@@ -36,7 +36,7 @@ export default function RightSidebar() {
   }
 
   return (
-    <aside id="default-sidebar" className="fixed top-0 right-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
+    <aside id="" className="" aria-label="Sidebar">
 
       <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
         <div>
@@ -59,7 +59,7 @@ export default function RightSidebar() {
                 <div className='flex flex-col'>
                   <span className="">{item} </span>
                 </div>
-                <div className='bg-slate-300 h-full p-4' onClick={() => deleteItem(item)}>
+                <div className='bg-slate-300 h-full px-2 ' onClick={() => deleteItem(item)}>
                   <span className='text-xs' >X</span>
                 </div>
               </a>

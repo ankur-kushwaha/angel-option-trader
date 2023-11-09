@@ -8,9 +8,18 @@ export default function ListingPage() {
   return (
     <div>
       <OptionDataProvider>
-        <Sidebar />
-        <Table />
-        <RightSidebar />
+        <div className='flex flex-col lg:flex-row'>
+          <Sidebar />
+          <div className='lg:hidden'>
+            <RightSidebar />
+          </div>
+          <div className='flex-1'>
+            <Table />
+          </div>
+          <div className='hidden lg:block'>
+            <RightSidebar />
+          </div>
+        </div>
       </OptionDataProvider>
     </div>
   )
