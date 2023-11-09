@@ -22,6 +22,17 @@ export default function Table() {
     })
   }
 
+  async function handleRefreshAll(){
+
+    let data  = JSON.parse(window.localStorage.getItem('OptionStocks')||"[]")
+    for(let stockCode of data){
+      await fetch(`/listing/api?stockCode=${stockCode}&multiple=5&threshold=5`)
+      .then(res => res.json()).then(data => {
+        appendData(key,data.data)
+      })
+    }
+  }
+
   return (
     <section className="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5">
         <div className="mx-auto max-w-screen-xl px-4 lg:px-12">
@@ -46,6 +57,12 @@ export default function Table() {
                     <path clipRule="evenodd" fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
                   </svg>
                   Refresh
+                </button>
+                <button onClick={handleRefreshAll} type="button" className="flex items-center justify-center bg-primary-700 hover:bg-primary-800 ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
+                  <svg className="h-3.5 w-3.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path clipRule="evenodd" fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+                  </svg>
+                  Refresh All
                 </button>
               </div>
             </div>

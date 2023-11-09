@@ -18,7 +18,6 @@ export default function Sidebar() {
     router.push('/listing?stockCode=' + stockCode + '&multiple=' + multiple + '&threshold=' + threshold)
   }
 
-
   return (
     <aside id="" className="" aria-label="Sidebar">
       <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
