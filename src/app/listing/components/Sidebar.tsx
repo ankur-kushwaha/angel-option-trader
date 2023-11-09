@@ -23,7 +23,7 @@ export default function Sidebar() {
     <aside id="default-sidebar" className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
       <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
         <ul className="space-y-2 font-medium">
-          {Object.keys(optionsData).sort((a,b)=>new Date(optionsData[b]?.createdAt||"").getTime()-new Date(optionsData[a]?.createdAt||"").getTime()).map((item, index) => {
+          {Object.keys(optionsData).sort((a,b)=>(optionsData[b]?.data[0].premium||0) - (optionsData[a]?.data[0].premium||0)).map((item, index) => {
             let [stockCode, multiple, threshold] = item.split("|");
             return <li key={index} onClick={() => handleClick(item)}>
               <a href="#" className="flex flex-row items-center justify-between p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">

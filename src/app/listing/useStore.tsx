@@ -46,6 +46,7 @@ export function OptionDataProvider({children}: {children: React.ReactNode}){
       data
     }
     setData(optionData)
+    
     window.localStorage.setItem('optionData', JSON.stringify(optionData));
   }
 
